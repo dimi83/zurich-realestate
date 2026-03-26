@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Zürich Zonenplan — Real Estate Explorer</title>
+<title>Zürich Real Estate Explorer</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
@@ -22,147 +22,86 @@
 }}
 html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px}
 
-header{
-  background:var(--surf);border-bottom:.5px solid var(--b2);
-  padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;
-  position:relative;z-index:1000;
-}
+header{background:var(--surf);border-bottom:.5px solid var(--b2);padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1000}
 .logo{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2.5s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.header-right{display:flex;align-items:center;gap:12px}
 .badge-live{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--green-bg);color:var(--green);font-weight:500}
 
-.layout{display:flex;height:calc(100vh - 52px)}
+.layout{display:flex;height:calc(100vh - 52px);overflow:hidden}
 
-/* Sidebar */
-.sidebar{
-  width:340px;flex-shrink:0;background:var(--surf);border-right:.5px solid var(--b2);
-  display:flex;flex-direction:column;overflow:hidden;z-index:500;
-}
+.sidebar{width:320px;flex-shrink:0;background:var(--surf);border-right:.5px solid var(--b2);display:flex;flex-direction:column;overflow:hidden;z-index:500}
 .sidebar-top{padding:1rem;border-bottom:.5px solid var(--b1)}
-.sidebar-title{font-size:13px;font-weight:500;margin-bottom:.6rem}
+.sidebar-title{font-size:12px;font-weight:500;margin-bottom:.6rem;color:var(--t2)}
 .search-wrap{position:relative}
-.search-input{
-  width:100%;background:var(--bg);border:.5px solid var(--b2);border-radius:8px;
-  padding:8px 36px 8px 12px;font-size:13px;color:var(--t1);font-family:'DM Sans',sans-serif;
-  outline:none;
-}
+.search-input{width:100%;background:var(--bg);border:.5px solid var(--b2);border-radius:8px;padding:8px 36px 8px 12px;font-size:13px;color:var(--t1);font-family:'DM Sans',sans-serif;outline:none}
 .search-input:focus{border-color:var(--blue)}
-.search-btn{
-  position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px;padding:4px;
-}
-.search-results{
-  position:absolute;top:100%;left:0;right:0;background:var(--surf);
-  border:.5px solid var(--b2);border-radius:8px;margin-top:4px;
-  z-index:2000;max-height:200px;overflow-y:auto;display:none;
-}
-.search-result-item{
-  padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:.5px solid var(--b1);
-  transition:background .1s;
-}
+.search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px;padding:4px}
+.search-results{position:absolute;top:100%;left:0;right:0;background:var(--surf);border:.5px solid var(--b2);border-radius:8px;margin-top:4px;z-index:2000;max-height:180px;overflow-y:auto;display:none;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.search-result-item{padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:.5px solid var(--b1);transition:background .1s}
 .search-result-item:last-child{border-bottom:none}
 .search-result-item:hover{background:var(--bg)}
 
 .sidebar-content{flex:1;overflow-y:auto;padding:1rem}
 
-/* Info panel */
-.info-placeholder{
-  text-align:center;padding:2rem 1rem;color:var(--t3);font-size:12px;line-height:1.7;
-}
-.info-placeholder .icon{font-size:32px;margin-bottom:.5rem;opacity:.4}
+.info-placeholder{text-align:center;padding:2rem 1rem;color:var(--t3);font-size:12px;line-height:1.7}
+.info-placeholder .icon{font-size:28px;margin-bottom:.5rem;opacity:.5}
 
 .zone-card{display:none}
-.zone-header{
-  background:var(--bg);border-radius:10px;padding:1rem;margin-bottom:.8rem;
-}
-.zone-name{font-size:20px;font-weight:500;font-family:'DM Mono',monospace;margin-bottom:4px}
+.zone-header{background:var(--bg);border-radius:10px;padding:.9rem;margin-bottom:.8rem}
+.zone-name{font-size:22px;font-weight:500;font-family:'DM Mono',monospace;margin-bottom:3px}
 .zone-desc{font-size:12px;color:var(--t2);line-height:1.5}
-.zone-badge{
-  display:inline-block;font-size:10px;padding:3px 9px;border-radius:99px;
-  font-weight:500;margin-top:8px;
-}
+.zone-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500;margin-top:6px}
 
-.section-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:.5rem}
-
-.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.8rem}
-.rule-item{background:var(--bg);border-radius:8px;padding:10px 11px}
-.rule-label{font-size:10px;color:var(--t3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
-.rule-val{font-size:16px;font-weight:500;font-family:'DM Mono',monospace;color:var(--t1)}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:.5rem;margin-top:.8rem}
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:.8rem}
+.rule-item{background:var(--bg);border-radius:8px;padding:9px 10px}
+.rule-label{font-size:10px;color:var(--t3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.rule-val{font-size:15px;font-weight:500;font-family:'DM Mono',monospace}
 .rule-unit{font-size:10px;color:var(--t3);font-family:'DM Sans',sans-serif}
 
 .permitted-list{list-style:none;margin-bottom:.8rem}
-.permitted-list li{
-  display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 0;
-  border-bottom:.5px solid var(--b1);color:var(--t2);
-}
+.permitted-list li{display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 0;border-bottom:.5px solid var(--b1);color:var(--t2)}
 .permitted-list li:last-child{border-bottom:none}
-.pi{font-size:14px}
 
-.info-note{
-  background:var(--amber-bg);border-radius:8px;padding:.75rem;
-  font-size:11px;color:var(--amber);line-height:1.5;margin-bottom:.8rem;
-}
+.info-note{background:var(--amber-bg);border-radius:8px;padding:.65rem;font-size:11px;color:var(--amber);line-height:1.5;margin-bottom:.8rem}
 
-.ext-links{display:flex;flex-direction:column;gap:6px}
-.ext-link{
-  display:flex;align-items:center;gap:8px;padding:8px 10px;
-  background:var(--bg);border:.5px solid var(--b1);border-radius:8px;
-  text-decoration:none;color:var(--blue);font-size:12px;transition:all .15s;
-}
-.ext-link:hover{border-color:var(--b2);background:var(--surf)}
+.ext-links{display:flex;flex-direction:column;gap:5px}
+.ext-link{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border:.5px solid var(--b1);border-radius:8px;text-decoration:none;color:var(--blue);font-size:12px;transition:all .15s}
+.ext-link:hover{border-color:var(--b2)}
 
-.coord-bar{
-  padding:.6rem 1rem;border-top:.5px solid var(--b1);
-  font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;
-  background:var(--bg);
-}
+.coord-bar{padding:.5rem 1rem;border-top:.5px solid var(--b1);font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;background:var(--bg);flex-shrink:0}
 
-/* Map */
-#map{flex:1;z-index:1;width:100%;height:100%}
+.map-container{flex:1;position:relative}
+#map{width:100%;height:100%}
 
-/* Legend */
-.legend{
-  position:absolute;bottom:24px;right:16px;z-index:999;
-  background:var(--surf);border:.5px solid var(--b1);border-radius:10px;
-  padding:.75rem 1rem;min-width:160px;
-}
+.map-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--surf);border:.5px solid var(--b1);border-radius:10px;padding:.75rem 1.2rem;font-size:12px;color:var(--t2);z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+
+.legend{position:absolute;bottom:24px;right:16px;z-index:999;background:var(--surf);border:.5px solid var(--b1);border-radius:10px;padding:.7rem 1rem;min-width:155px}
 .legend-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:.5rem}
-.legend-item{display:flex;align-items:center;gap:8px;font-size:11px;margin-bottom:4px;color:var(--t2)}
-.legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;opacity:.75}
-
-/* Loading overlay */
-.map-loading{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  background:var(--surf);border:.5px solid var(--b1);border-radius:10px;
-  padding:1rem 1.5rem;font-size:12px;color:var(--t2);z-index:999;display:none;
-  box-shadow:0 4px 20px rgba(0,0,0,.08);
-}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;margin-bottom:3px;color:var(--t2)}
+.legend-swatch{width:13px;height:13px;border-radius:3px;flex-shrink:0;opacity:.8}
 
 @media(max-width:700px){
   .layout{flex-direction:column}
-  .sidebar{width:100%;height:280px}
-  #map{flex:1}
+  .sidebar{width:100%;height:260px}
+  .map-container{flex:1}
 }
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo"><div class="dot"></div>Zürich Real Estate Explorer</div>
-  <div class="header-right">
-    <span class="badge-live">Stadt Zürich Open Data</span>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="badge-live">Stadt Zürich BZO Data</span>
     <span style="font-size:11px;color:var(--t3);font-family:'DM Mono',monospace" id="hdate"></span>
   </div>
 </header>
 
 <div class="layout">
-
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-top">
-      <div class="sidebar-title">Search address or click map</div>
+      <div class="sidebar-title">Search address or click on map</div>
       <div class="search-wrap">
         <input type="text" class="search-input" id="search-input" placeholder="e.g. Bahnhofstrasse 1, Zürich"/>
         <button class="search-btn" onclick="doSearch()">⌕</button>
@@ -171,12 +110,12 @@ header{
     </div>
 
     <div class="sidebar-content" id="sidebar-content">
-      <div class="info-placeholder">
+      <div class="info-placeholder" id="placeholder">
         <div class="icon">📍</div>
         <strong>Click anywhere on the map</strong><br/>
-        to see the zone regulations<br/>for that parcel
+        to see the BZO zone regulations<br/>for that location
         <br/><br/>
-        <span style="font-size:11px">Data: Bau- und Zonenordnung<br/>Stadt Zürich (BZO 2016)</span>
+        <span style="font-size:11px;color:var(--t3)">Source: Bau- und Zonenordnung<br/>Stadt Zürich (BZO 2016)</span>
       </div>
 
       <div class="zone-card" id="zone-card">
@@ -192,19 +131,13 @@ header{
         <div class="section-title">Permitted uses</div>
         <ul class="permitted-list" id="permitted-list"></ul>
 
-        <div class="info-note" id="info-note"></div>
+        <div class="info-note" id="info-note" style="display:none"></div>
 
         <div class="section-title">Official sources</div>
         <div class="ext-links">
-          <a class="ext-link" href="https://www.stadt-zuerich.ch/de/planen-und-bauen/stadtplanung/bau-zonenordnung.html" target="_blank">
-            📄 Bau- und Zonenordnung (BZO)
-          </a>
-          <a class="ext-link" id="link-oereb" href="https://www.oereb-stzh.ch" target="_blank">
-            🗺 ÖREB-Kataster Zürich
-          </a>
-          <a class="ext-link" href="https://www.geoportal.ch/map/14" target="_blank">
-            🔍 Geoportal Stadt Zürich
-          </a>
+          <a class="ext-link" href="https://www.stadt-zuerich.ch/de/planen-und-bauen/stadtplanung/bau-zonenordnung.html" target="_blank">📄 Bau- und Zonenordnung (BZO)</a>
+          <a class="ext-link" id="link-oereb" href="https://www.oereb-stzh.ch" target="_blank">🗺 ÖREB-Kataster Zürich</a>
+          <a class="ext-link" href="https://www.stadt-zuerich.ch/de/planen-und-bauen/stadtplanung/bau-zonenordnung/zonenplan.html" target="_blank">🔍 Zonenplan Stadt Zürich</a>
         </div>
       </div>
     </div>
@@ -212,19 +145,16 @@ header{
     <div class="coord-bar" id="coord-bar">Click on the map to get zone information</div>
   </div>
 
-  <!-- Map -->
-  <div style="position:relative;flex:1;min-height:500px">
-    <div id="map" style="width:100%;height:100%;min-height:500px"></div>
+  <div class="map-container">
+    <div id="map"></div>
     <div class="map-loading" id="map-loading">⏳ Loading zone data…</div>
-
-    <!-- Legend -->
     <div class="legend">
       <div class="legend-title">Zone types</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#ffd700"></div>W — Wohnzone</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#ff8c00"></div>Z — Zentrumzone</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ff6347"></div>Z — Zentrumzone</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#4169e1"></div>G — Gewerbezone</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#228b22"></div>FF — Freifläche</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#dc143c"></div>I — Industriezone</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#8b0000"></div>I — Industriezone</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#9370db"></div>OeBA — Öff. Bauten</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#20b2aa"></div>K — Kernzone</div>
     </div>
@@ -234,137 +164,107 @@ header{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 document.getElementById('hdate').textContent =
-  new Date().toLocaleDateString('de-CH', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  new Date().toLocaleDateString('de-CH',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 
-// ── BZO Zone data (Stadt Zürich BZO 2016) ────────────────────────────────────
+// ── BZO Zone database ─────────────────────────────────────────────────────────
 const ZONES = {
-  // Wohnzonen
-  'W2':  { name:'W2', desc:'Wohnzone 2 Vollgeschosse', type:'Wohn', floors:'2', gcr:'0.50', far:'0.60', height:'8m', color:'#fffacd', uses:['🏠 Wohnen','✅ Kleingewerbe (nicht störend)'], note:'Kleines Maß der Nutzung. Aufstockungen auf max. 2 Vollgeschosse.' },
-  'W3':  { name:'W3', desc:'Wohnzone 3 Vollgeschosse', type:'Wohn', floors:'3', gcr:'0.50', far:'0.80', height:'11m', color:'#ffd700', uses:['🏠 Wohnen','✅ Kleingewerbe (nicht störend)','✅ freie Berufe'], note:'Mittleres Wohngebiet. Max. 3 Vollgeschosse.' },
-  'W4':  { name:'W4', desc:'Wohnzone 4 Vollgeschosse', type:'Wohn', floors:'4', gcr:'0.55', far:'1.20', height:'14m', color:'#ffc200', uses:['🏠 Wohnen','✅ Kleingewerbe','✅ freie Berufe','✅ Büros (beschränkt)'], note:'Höhere Wohnnutzung. Max. 4 Vollgeschosse.' },
-  'W5':  { name:'W5', desc:'Wohnzone 5 Vollgeschosse', type:'Wohn', floors:'5', gcr:'0.60', far:'1.60', height:'17m', color:'#ffb300', uses:['🏠 Wohnen','✅ Kleingewerbe','✅ Büros','✅ freie Berufe'], note:'Dichteres Wohngebiet. Max. 5 Vollgeschosse.' },
-  'W5a': { name:'W5a', desc:'Wohnzone 5a — erhöhte Ausnützung', type:'Wohn', floors:'5', gcr:'0.65', far:'1.80', height:'17m', color:'#ffa500', uses:['🏠 Wohnen','✅ Kleingewerbe','✅ Büros'], note:'Erhöhte Ausnützungsziffer gegenüber W5.' },
-  'W6':  { name:'W6', desc:'Wohnzone 6 Vollgeschosse', type:'Wohn', floors:'6', gcr:'0.65', far:'2.00', height:'20m', color:'#ff8c00', uses:['🏠 Wohnen','✅ Gewerbe','✅ Büros'], note:'Hochdichte Wohnnutzung. Max. 6 Vollgeschosse.' },
-
-  // Zentrumszonen
-  'Z3':  { name:'Z3', desc:'Zentrumzone 3 Vollgeschosse', type:'Zentrum', floors:'3', gcr:'0.80', far:'1.50', height:'11m', color:'#ffdead', uses:['🏠 Wohnen','🏪 Läden & Gewerbe','🏢 Büros','🍽 Restaurants'], note:'Gemischte Nutzung im Zentrumsbereich.' },
-  'Z4':  { name:'Z4', desc:'Zentrumzone 4 Vollgeschosse', type:'Zentrum', floors:'4', gcr:'0.85', far:'2.00', height:'14m', color:'#ff7f50', uses:['🏠 Wohnen','🏪 Detailhandel','🏢 Büros','🍽 Gastronomie','🏨 Hotels'], note:'Höhere Nutzungsdichte im Zentrumsbereich.' },
-  'Z5':  { name:'Z5', desc:'Zentrumzone 5 Vollgeschosse', type:'Zentrum', floors:'5', gcr:'0.90', far:'2.50', height:'17m', color:'#ff6347', uses:['🏠 Wohnen','🏪 Detailhandel','🏢 Büros','🍽 Gastronomie','🏨 Hotels'], note:'Hohe Nutzungsdichte. Erdgeschoss Publikumsnutzung empfohlen.' },
-  'Z5a': { name:'Z5a', desc:'Zentrumzone 5a — erhöhte Nutzung', type:'Zentrum', floors:'5', gcr:'0.90', far:'2.80', height:'17m', color:'#ff4500', uses:['🏠 Wohnen','🏪 Detailhandel','🏢 Büros','🏨 Hotels'], note:'Erhöhte Ausnützung gegenüber Z5.' },
-  'Z6':  { name:'Z6', desc:'Zentrumzone 6 Vollgeschosse', type:'Zentrum', floors:'6', gcr:'1.00', far:'3.00', height:'20m', color:'#dc143c', uses:['🏪 Detailhandel','🏢 Büros','🏨 Hotels','🍽 Gastronomie'], note:'Höchste Zentrumsdichte. Innenstadt / City.' },
-
-  // Gewerbezonen
-  'G':   { name:'G', desc:'Gewerbezone', type:'Gewerbe', floors:'4', gcr:'0.80', far:'2.50', height:'—', color:'#4169e1', uses:['🏭 Gewerbe & Industrie (nicht störend)','🏢 Büros','✅ Wohnen (eingeschränkt)'], note:'Nicht störendes Gewerbe. Wohnen nur für Betriebspersonal.' },
-  'G2':  { name:'G2', desc:'Gewerbezone II', type:'Gewerbe', floors:'4', gcr:'0.80', far:'2.50', height:'—', color:'#1e90ff', uses:['🏭 Gewerbe','🏢 Büros'], note:'Mässig störendes Gewerbe zulässig.' },
-
-  // Industriezonen
-  'I':   { name:'I', desc:'Industriezone', type:'Industrie', floors:'—', gcr:'—', far:'—', height:'—', color:'#8b0000', uses:['🏭 Industrie & Gewerbe (stark störend)'], note:'Stark störende Betriebe zulässig. Wohnen verboten.' },
-  'I2':  { name:'I2', desc:'Industriezone II', type:'Industrie', floors:'—', gcr:'—', far:'—', height:'—', color:'#b22222', uses:['🏭 Industrie','🏭 Gewerbe'], note:'Stark störendes Gewerbe und Industrie.' },
-
-  // Kernzonen
-  'Ka':  { name:'Ka', desc:'Kernzone a — Altstadt', type:'Kern', floors:'—', gcr:'—', far:'—', height:'Bestand', color:'#20b2aa', uses:['🏠 Wohnen','🏪 Gewerbe','🏢 Büros'], note:'Erhaltung des historischen Ortsbilds. Besondere Anforderungen an Gestaltung. Denkmalschutz beachten.' },
-  'Kb':  { name:'Kb', desc:'Kernzone b', type:'Kern', floors:'—', gcr:'—', far:'—', height:'Bestand', color:'#008b8b', uses:['🏠 Wohnen','🏪 Gewerbe'], note:'Erhaltung des Quartierscharakters.' },
-  'K':   { name:'K', desc:'Kernzone', type:'Kern', floors:'—', gcr:'—', far:'—', height:'Bestand', color:'#2e8b57', uses:['🏠 Wohnen','🏪 Gewerbe','🏢 Büros'], note:'Schutz des Orts- und Quartiersbilds.' },
-
-  // Freiflächen & Grünzonen
-  'FF':  { name:'FF', desc:'Freifläche', type:'Freifläche', floors:'0', gcr:'0', far:'0', height:'—', color:'#90ee90', uses:['🌳 Grün- und Freifläche','⛔ Keine Bebauung'], note:'Nicht überbaubar. Dient der Erholung und dem Grünraum.' },
-  'Gr':  { name:'Gr', desc:'Grünzone', type:'Freifläche', floors:'0', gcr:'0', far:'0', height:'—', color:'#228b22', uses:['🌳 Grünfläche','🌿 Gartennutzung'], note:'Überbauung stark eingeschränkt.' },
-  'Fr':  { name:'Fr', desc:'Freihaltezone', type:'Freifläche', floors:'0', gcr:'0', far:'0', height:'—', color:'#32cd32', uses:['🌾 Landwirtschaft','🌳 Natur'], note:'Freihaltung von Bebauung zum Schutz der Landschaft.' },
-
-  // Öffentliche Bauten
-  'OeBA':{ name:'OeBA', desc:'Öffentliche Bauten und Anlagen', type:'Öffentlich', floors:'—', gcr:'—', far:'—', height:'—', color:'#9370db', uses:['🏫 Schule','🏥 Spital','🏛 Verwaltung','⛪ Kirche','🏟 Sport'], note:'Reserviert für öffentliche Nutzungen.' },
-  'OeFF':{ name:'OeFF', desc:'Öffentliche Freifläche', type:'Öffentlich', floors:'0', gcr:'0', far:'0', height:'—', color:'#ba55d3', uses:['🌳 Park','⛺ Erholung'], note:'Öffentliche Grün- und Freifläche.' },
-
-  // Spezialzonen
-  'Sp':  { name:'Sp', desc:'Sportzone', type:'Sport', floors:'—', gcr:'—', far:'—', height:'—', color:'#87ceeb', uses:['⚽ Sport','🏊 Bäder','🏃 Freizeit'], note:'Ausschliesslich für Sportanlagen.' },
-  'MK':  { name:'MK', desc:'Mischzone Kernbereich', type:'Misch', floors:'4', gcr:'0.80', far:'2.20', height:'14m', color:'#dda0dd', uses:['🏠 Wohnen','🏪 Gewerbe','🏢 Büros'], note:'Gemischte Nutzung.' },
+  'W2': {name:'W2',desc:'Wohnzone 2 Vollgeschosse',type:'Wohn',floors:'2',height:'8m',far:'0.60',gcr:'0.50',color:'#fffacd',uses:['🏠 Wohnen','✅ Kleingewerbe (nicht störend)'],note:'Max. 2 Vollgeschosse. Kleines Nutzungsmaß.'},
+  'W3': {name:'W3',desc:'Wohnzone 3 Vollgeschosse',type:'Wohn',floors:'3',height:'11m',far:'0.80',gcr:'0.50',color:'#ffd700',uses:['🏠 Wohnen','✅ Kleingewerbe','✅ Freie Berufe'],note:'Max. 3 Vollgeschosse. Mittleres Wohngebiet.'},
+  'W4': {name:'W4',desc:'Wohnzone 4 Vollgeschosse',type:'Wohn',floors:'4',height:'14m',far:'1.20',gcr:'0.55',color:'#ffc200',uses:['🏠 Wohnen','✅ Kleingewerbe','✅ Büros (beschränkt)','✅ Freie Berufe'],note:'Max. 4 Vollgeschosse.'},
+  'W5': {name:'W5',desc:'Wohnzone 5 Vollgeschosse',type:'Wohn',floors:'5',height:'17m',far:'1.60',gcr:'0.60',color:'#ffb300',uses:['🏠 Wohnen','✅ Kleingewerbe','✅ Büros','✅ Freie Berufe'],note:'Max. 5 Vollgeschosse. Dichteres Wohngebiet.'},
+  'W5A':{name:'W5a',desc:'Wohnzone 5a — erhöhte Ausnützung',type:'Wohn',floors:'5',height:'17m',far:'1.80',gcr:'0.65',color:'#ffa500',uses:['🏠 Wohnen','✅ Kleingewerbe','✅ Büros'],note:'Erhöhte Ausnützungsziffer gegenüber W5.'},
+  'W6': {name:'W6',desc:'Wohnzone 6 Vollgeschosse',type:'Wohn',floors:'6',height:'20m',far:'2.00',gcr:'0.65',color:'#ff8c00',uses:['🏠 Wohnen','✅ Gewerbe','✅ Büros'],note:'Max. 6 Vollgeschosse. Hochdichte Wohnnutzung.'},
+  'Z3': {name:'Z3',desc:'Zentrumzone 3 Vollgeschosse',type:'Zentrum',floors:'3',height:'11m',far:'1.50',gcr:'0.80',color:'#ffdead',uses:['🏠 Wohnen','🏪 Läden','🏢 Büros','🍽 Restaurants'],note:'Gemischte Nutzung im Zentrum.'},
+  'Z4': {name:'Z4',desc:'Zentrumzone 4 Vollgeschosse',type:'Zentrum',floors:'4',height:'14m',far:'2.00',gcr:'0.85',color:'#ff7f50',uses:['🏠 Wohnen','🏪 Detailhandel','🏢 Büros','🍽 Gastronomie','🏨 Hotels'],note:'Höhere Zentrumsdichte. Max. 4 Vollgeschosse.'},
+  'Z5': {name:'Z5',desc:'Zentrumzone 5 Vollgeschosse',type:'Zentrum',floors:'5',height:'17m',far:'2.50',gcr:'0.90',color:'#ff6347',uses:['🏠 Wohnen','🏪 Detailhandel','🏢 Büros','🏨 Hotels'],note:'Hohe Dichte. Erdgeschoss Publikumsnutzung empfohlen.'},
+  'Z5A':{name:'Z5a',desc:'Zentrumzone 5a',type:'Zentrum',floors:'5',height:'17m',far:'2.80',gcr:'0.90',color:'#ff4500',uses:['🏠 Wohnen','🏪 Detailhandel','🏢 Büros','🏨 Hotels'],note:'Erhöhte Ausnützung gegenüber Z5.'},
+  'Z6': {name:'Z6',desc:'Zentrumzone 6 Vollgeschosse',type:'Zentrum',floors:'6',height:'20m',far:'3.00',gcr:'1.00',color:'#dc143c',uses:['🏪 Detailhandel','🏢 Büros','🏨 Hotels','🍽 Gastronomie'],note:'Höchste Zentrumsdichte. City / Innenstadt.'},
+  'G':  {name:'G',desc:'Gewerbezone',type:'Gewerbe',floors:'4',height:'—',far:'2.50',gcr:'0.80',color:'#4169e1',uses:['🏭 Gewerbe (nicht störend)','🏢 Büros','✅ Wohnen (Betriebspersonal)'],note:'Nicht störendes Gewerbe. Kein allgemeines Wohnen.'},
+  'I':  {name:'I',desc:'Industriezone',type:'Industrie',floors:'—',height:'—',far:'—',gcr:'—',color:'#8b0000',uses:['🏭 Industrie & Gewerbe (störend)'],note:'Stark störende Betriebe zulässig. Wohnen verboten.'},
+  'KA': {name:'Ka',desc:'Kernzone a — historische Altstadt',type:'Kern',floors:'Bestand',height:'Bestand',far:'—',gcr:'—',color:'#20b2aa',uses:['🏠 Wohnen','🏪 Gewerbe','🏢 Büros'],note:'Erhaltung Ortsbild. Besondere Gestaltungsanforderungen. Denkmalschutz beachten.'},
+  'KB': {name:'Kb',desc:'Kernzone b',type:'Kern',floors:'Bestand',height:'Bestand',far:'—',gcr:'—',color:'#008b8b',uses:['🏠 Wohnen','🏪 Gewerbe'],note:'Erhaltung des Quartierscharakters.'},
+  'K':  {name:'K',desc:'Kernzone',type:'Kern',floors:'Bestand',height:'Bestand',far:'—',gcr:'—',color:'#2e8b57',uses:['🏠 Wohnen','🏪 Gewerbe','🏢 Büros'],note:'Schutz des Orts- und Quartiersbilds.'},
+  'FF': {name:'FF',desc:'Freifläche',type:'Freifläche',floors:'0',height:'—',far:'0',gcr:'0',color:'#90ee90',uses:['🌳 Grün- und Freifläche','⛔ Keine Bebauung'],note:'Nicht überbaubar. Erholung und Grünraum.'},
+  'GR': {name:'Gr',desc:'Grünzone',type:'Freifläche',floors:'0',height:'—',far:'0',gcr:'0',color:'#228b22',uses:['🌳 Grünfläche'],note:'Bebauung stark eingeschränkt.'},
+  'OEBA':{name:'OeBA',desc:'Öffentliche Bauten und Anlagen',type:'Öffentlich',floors:'—',height:'—',far:'—',gcr:'—',color:'#9370db',uses:['🏫 Schulen','🏥 Spitäler','🏛 Verwaltung','⛪ Kirchen'],note:'Reserviert für öffentliche Nutzungen.'},
+  'SP': {name:'Sp',desc:'Sportzone',type:'Sport',floors:'—',height:'—',far:'—',gcr:'—',color:'#87ceeb',uses:['⚽ Sport','🏊 Bäder','🏃 Freizeit'],note:'Ausschliesslich für Sportanlagen.'},
 };
 
-// ── Zone color lookup ─────────────────────────────────────────────────────────
+function getZone(code) {
+  if (!code) return null;
+  const c = code.trim().toUpperCase().replace(/\s+/g,'').replace(/-/g,'');
+  return ZONES[c] || null;
+}
+
 function zoneColor(code) {
-  if (!code) return '#cccccc';
-  const c = code.trim().toUpperCase();
-  if (ZONES[c]) return ZONES[c].color;
-  if (c.startsWith('W'))    return '#ffd700';
-  if (c.startsWith('Z'))    return '#ff6347';
-  if (c.startsWith('G'))    return '#4169e1';
-  if (c.startsWith('I'))    return '#8b0000';
-  if (c.startsWith('K'))    return '#20b2aa';
+  const z = getZone(code);
+  if (z) return z.color;
+  const c = (code||'').toUpperCase();
+  if (c.startsWith('W'))  return '#ffd700';
+  if (c.startsWith('Z'))  return '#ff6347';
+  if (c.startsWith('G') && !c.startsWith('GR')) return '#4169e1';
+  if (c.startsWith('I'))  return '#8b0000';
+  if (c.startsWith('K'))  return '#20b2aa';
   if (c.startsWith('FF') || c.startsWith('GR') || c.startsWith('FR')) return '#228b22';
-  if (c.startsWith('OEBA') || c.startsWith('OEFF')) return '#9370db';
-  if (c.startsWith('SP'))   return '#87ceeb';
-  return '#aaaaaa';
+  if (c.startsWith('OE') || c.startsWith('SP')) return '#9370db';
+  return '#aaa';
 }
 
-function zoneBadgeClass(type) {
-  if (!type) return '';
-  if (type === 'Wohn')     return 'background:var(--amber-bg);color:var(--amber)';
-  if (type === 'Zentrum')  return 'background:var(--red-bg);color:var(--red)';
-  if (type === 'Gewerbe')  return 'background:#e8eaf6;color:#3949ab';
-  if (type === 'Kern')     return 'background:#e0f2f1;color:#00695c';
-  if (type === 'Freifläche') return 'background:var(--green-bg);color:var(--green)';
-  return 'background:var(--bg);color:var(--t2)';
-}
+// ── Map init ──────────────────────────────────────────────────────────────────
+const map = L.map('map', {
+  center: [47.3769, 8.5417],
+  zoom: 13,
+  zoomControl: true
+});
 
-// ── Init map ──────────────────────────────────────────────────────────────────
-const map = L.map('map', { center:[47.3769, 8.5417], zoom:13 });
-setTimeout(() => { map.invalidateSize(); map.setView([47.3769, 8.5417], 13); }, 500);
-
+// OpenStreetMap base (CORS-free — works from anywhere)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-  maxZoom:19
+  attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+  maxZoom: 19
 }).addTo(map);
 
-// WMS overlay — Zonenplan Stadt Zürich
-const wmsUrl = 'https://www.ogd.stadt-zuerich.ch/wms/geoportal/Nutzungsplanung_kommunale_Bau_und_Zonenordnung_BZO';
-const zoneWMS = L.tileLayer.wms(wmsUrl, {
-  layers: 'Zonenplan',
-  format: 'image/png',
-  transparent: true,
-  opacity: 0.55,
-  attribution: '© Stadt Zürich — Zonenplan BZO'
-}).addTo(map);
+// Force map to render correctly after layout settles
+window.addEventListener('load', () => {
+  setTimeout(() => { map.invalidateSize(); }, 300);
+});
 
-// Track cursor
+// ── WFS proxy URLs (using corsproxy.io as CORS bridge) ────────────────────────
+const WFS_BASE = 'https://www.ogd.stadt-zuerich.ch/wfs/geoportal/Nutzungsplanung_kommunale_Bau_und_Zonenordnung_BZO';
+const PROXY    = 'https://corsproxy.io/?';
+
+let clickMarker = null;
+
 map.on('mousemove', e => {
   document.getElementById('coord-bar').textContent =
     `Lat: ${e.latlng.lat.toFixed(5)}  Lng: ${e.latlng.lng.toFixed(5)}`;
 });
 
-let clickMarker = null;
-
-// ── Click handler — query WFS for zone ───────────────────────────────────────
 map.on('click', async e => {
-  const { lat, lng } = e.latlng;
-
+  const {lat, lng} = e.latlng;
   if (clickMarker) map.removeLayer(clickMarker);
-  clickMarker = L.circleMarker([lat, lng], {
-    radius: 8, color: '#174f96', fillColor: '#174f96', fillOpacity: 0.8, weight: 2
+  clickMarker = L.circleMarker([lat,lng],{
+    radius:8, color:'#174f96', fillColor:'#174f96', fillOpacity:.85, weight:2
   }).addTo(map);
 
   document.getElementById('map-loading').style.display = 'block';
-  document.getElementById('coord-bar').textContent =
-    `Querying zone at ${lat.toFixed(5)}, ${lng.toFixed(5)}…`;
-
   try {
     await queryZone(lat, lng);
-  } catch(e) {
-    console.error(e);
-    showError();
+  } catch(err) {
+    console.error(err);
+    showFallback(lat, lng);
   } finally {
     document.getElementById('map-loading').style.display = 'none';
   }
 });
 
 async function queryZone(lat, lng) {
-  // WFS GetFeature with a small bbox around click point
-  const delta = 0.0003;
+  const delta = 0.0004;
   const bbox  = `${lng-delta},${lat-delta},${lng+delta},${lat+delta}`;
-  const wfsBase = 'https://www.ogd.stadt-zuerich.ch/wfs/geoportal/Nutzungsplanung_kommunale_Bau_und_Zonenordnung_BZO';
-  const url = `${wfsBase}?service=WFS&version=1.1.0&request=GetFeature&typename=bzo_zonen_flaechen&outputFormat=GeoJSON&srsName=EPSG:4326&bbox=${bbox},EPSG:4326`;
+  const wfsUrl = `${WFS_BASE}?service=WFS&version=1.1.0&request=GetFeature&typename=bzo_zonen_flaechen&outputFormat=GeoJSON&srsName=EPSG:4326&bbox=${bbox},EPSG:4326`;
+  const url    = PROXY + encodeURIComponent(wfsUrl);
 
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('WFS error');
+  const resp = await fetch(url, {headers:{'x-requested-with':'XMLHttpRequest'}});
+  if (!resp.ok) throw new Error('WFS error ' + resp.status);
   const data = await resp.json();
 
   if (!data.features || !data.features.length) {
@@ -372,62 +272,56 @@ async function queryZone(lat, lng) {
     return;
   }
 
-  // Find the feature that contains the click point
-  const feat = data.features[0];
-  const props = feat.properties || {};
+  const props = data.features[0].properties || {};
+  // Try all possible field names from Stadt Zürich WFS
+  const code = props.zone || props.ZONE || props.zonenbezeichnung ||
+               props.ZONENBEZEICHNUNG || props.bzo_zone || props.BZO_ZONE ||
+               props.bezeichnung || props.BEZEICHNUNG || props.art ||
+               props.ART || Object.values(props)[0] || 'Unbekannt';
 
-  // Try common field names from Stadt Zürich WFS
-  const zoneCode = props.zone || props.ZONE || props.zonenbezeichnung ||
-                   props.ZONENBEZEICHNUNG || props.bzo_zone || props.BZO_ZONE ||
-                   props.bezeichnung || props.BEZEICHNUNG || 'Unbekannt';
-
-  showZoneInfo(zoneCode, props, lat, lng);
+  showZoneInfo(String(code), props, lat, lng);
 }
 
 function showZoneInfo(code, props, lat, lng) {
-  const clean = code.trim().replace(/\s+/g,'');
-  const info  = ZONES[clean.toUpperCase()] || ZONES[clean] || null;
+  const info  = getZone(code);
+  const color = zoneColor(code);
 
-  document.querySelector('.info-placeholder').style.display = 'none';
-  document.getElementById('zone-card').style.display = 'block';
+  document.getElementById('placeholder').style.display  = 'none';
+  document.getElementById('zone-card').style.display    = 'block';
 
-  const name  = info ? info.name : clean;
-  const desc  = info ? info.desc : `Zone: ${clean}`;
-  const color = zoneColor(clean);
-
-  document.getElementById('zone-name').textContent = name;
-  document.getElementById('zone-desc').textContent = desc;
-  document.getElementById('zone-header').style.background = color + '22';
+  document.getElementById('zone-name').textContent = info ? info.name : code;
+  document.getElementById('zone-desc').textContent = info ? info.desc : `Zone: ${code}`;
+  document.getElementById('zone-header').style.background = color + '25';
 
   const badge = document.getElementById('zone-badge');
   badge.textContent = info ? info.type : 'Zone';
-  badge.style.cssText = info ? zoneBadgeClass(info.type) : 'background:var(--bg);color:var(--t2)';
+  badge.style.cssText = getBadgeStyle(info ? info.type : '');
 
-  // Rules grid
+  // Rules
   const rg = document.getElementById('rules-grid');
   if (info) {
     rg.innerHTML = [
-      ['Max. Geschosse', info.floors, 'Vollgeschosse'],
-      ['Gebäudehöhe', info.height, ''],
-      ['Ausnützungsziffer', info.far, 'AZ'],
-      ['Überbauungsziffer', info.gcr, 'ÜZ'],
+      ['Max. Geschosse', info.floors, ''],
+      ['Gebäudehöhe',    info.height, ''],
+      ['Ausnützung (AZ)',info.far,    ''],
+      ['Überbauung (ÜZ)',info.gcr,    ''],
     ].map(([l,v,u])=>`
       <div class="rule-item">
         <div class="rule-label">${l}</div>
-        <div class="rule-val">${v} <span class="rule-unit">${u}</span></div>
-      </div>
-    `).join('');
+        <div class="rule-val">${v}<span class="rule-unit"> ${u}</span></div>
+      </div>`).join('');
   } else {
-    rg.innerHTML = `<div class="rule-item" style="grid-column:1/-1"><div class="rule-label">Zone</div><div class="rule-val">${clean}</div></div>`;
+    rg.innerHTML = `<div class="rule-item" style="grid-column:1/-1">
+      <div class="rule-label">Zonencode</div>
+      <div class="rule-val">${code}</div>
+    </div>`;
   }
 
-  // Permitted uses
+  // Uses
   const pl = document.getElementById('permitted-list');
-  if (info && info.uses) {
-    pl.innerHTML = info.uses.map(u=>`<li><span class="pi">${u.slice(0,2)}</span>${u.slice(2)}</li>`).join('');
-  } else {
-    pl.innerHTML = '<li>Siehe offizielle BZO Dokumente</li>';
-  }
+  pl.innerHTML = info && info.uses
+    ? info.uses.map(u=>`<li>${u}</li>`).join('')
+    : '<li>Siehe offizielle BZO Dokumente</li>';
 
   // Note
   const note = document.getElementById('info-note');
@@ -438,87 +332,92 @@ function showZoneInfo(code, props, lat, lng) {
     note.style.display = 'none';
   }
 
-  // Update ÖREB link with coordinates
   document.getElementById('link-oereb').href =
-    `https://www.oereb-stzh.ch/?egrid=&x=${lng}&y=${lat}`;
-
+    `https://www.oereb-stzh.ch/?x=${lng}&y=${lat}`;
   document.getElementById('coord-bar').textContent =
-    `Zone: ${name}  ·  ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    `Zone: ${info ? info.name : code}  ·  ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+}
+
+function getBadgeStyle(type) {
+  if (type==='Wohn')      return 'background:var(--amber-bg);color:var(--amber)';
+  if (type==='Zentrum')   return 'background:var(--red-bg);color:var(--red)';
+  if (type==='Gewerbe')   return 'background:#e8eaf6;color:#3949ab';
+  if (type==='Kern')      return 'background:#e0f2f1;color:#00695c';
+  if (type==='Freifläche')return 'background:var(--green-bg);color:var(--green)';
+  if (type==='Industrie') return 'background:#fce4e4;color:#b71c1c';
+  return 'background:var(--bg);color:var(--t2)';
 }
 
 function showNoZone(lat, lng) {
-  document.querySelector('.info-placeholder').style.display = 'none';
-  document.getElementById('zone-card').style.display = 'block';
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('zone-card').style.display   = 'block';
   document.getElementById('zone-name').textContent = 'Keine Zone';
-  document.getElementById('zone-desc').textContent = 'Kein Zoneneintrag an dieser Stelle gefunden.';
+  document.getElementById('zone-desc').textContent = 'Kein Zoneneintrag an dieser Stelle.';
   document.getElementById('zone-header').style.background = 'var(--bg)';
   document.getElementById('zone-badge').textContent = '';
   document.getElementById('rules-grid').innerHTML = '';
-  document.getElementById('permitted-list').innerHTML =
-    '<li>Möglicherweise ausserhalb Stadtgebiet</li>';
+  document.getElementById('permitted-list').innerHTML = '<li>Möglicherweise ausserhalb Stadtgebiet</li>';
   document.getElementById('info-note').style.display = 'none';
   document.getElementById('coord-bar').textContent =
-    `Kein Zoneneintrag  ·  ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    `Kein Zoneneintrag · ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 }
 
-function showError() {
-  document.getElementById('coord-bar').textContent =
-    'Fehler beim Laden der Zonendaten — bitte erneut versuchen';
+function showFallback(lat, lng) {
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('zone-card').style.display   = 'block';
+  document.getElementById('zone-name').textContent = 'Fehler';
+  document.getElementById('zone-desc').textContent = 'Zonendaten konnten nicht geladen werden. Bitte erneut versuchen.';
+  document.getElementById('zone-header').style.background = 'var(--red-bg)';
+  document.getElementById('zone-badge').textContent = '';
+  document.getElementById('rules-grid').innerHTML = '';
+  document.getElementById('permitted-list').innerHTML = '<li>Server nicht erreichbar</li>';
+  document.getElementById('info-note').style.display = 'none';
+  document.getElementById('coord-bar').textContent = 'Fehler beim Laden der Zonendaten';
 }
 
-// ── Address search (nominatim + restricted to Zürich) ────────────────────────
-const searchInput = document.getElementById('search-input');
+// ── Address search ────────────────────────────────────────────────────────────
+const searchInput   = document.getElementById('search-input');
 const searchResults = document.getElementById('search-results');
 let searchTimer;
 
 searchInput.addEventListener('input', () => {
   clearTimeout(searchTimer);
   const q = searchInput.value.trim();
-  if (q.length < 3) { searchResults.style.display = 'none'; return; }
+  if (q.length < 3) { searchResults.style.display='none'; return; }
   searchTimer = setTimeout(() => searchAddress(q), 400);
 });
-
-searchInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
-});
-
+searchInput.addEventListener('keydown', e => { if (e.key==='Enter') doSearch(); });
 document.addEventListener('click', e => {
-  if (!e.target.closest('.search-wrap')) searchResults.style.display = 'none';
+  if (!e.target.closest('.search-wrap')) searchResults.style.display='none';
 });
 
 async function searchAddress(q) {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+', Zürich')}&format=json&limit=5&addressdetails=1&countrycodes=ch`;
-    const resp = await fetch(url, { headers: { 'Accept-Language': 'de' } });
+    const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+', Zürich Switzerland')}&format=json&limit=5&countrycodes=ch`;
+    const resp = await fetch(url, {headers:{'Accept-Language':'de'}});
     const data = await resp.json();
-    if (!data.length) { searchResults.style.display = 'none'; return; }
-    searchResults.innerHTML = data.map((r,i)=>
-      `<div class="search-result-item" onclick="goToResult(${r.lat},${r.lon},'${r.display_name.replace(/'/g,"\\'")}')">
+    if (!data.length) { searchResults.style.display='none'; return; }
+    searchResults.innerHTML = data.map(r=>
+      `<div class="search-result-item" onclick="goToResult(${r.lat},${r.lon},'${r.display_name.replace(/'/g,"\\'").slice(0,60)}')">
         📍 ${r.display_name.split(',').slice(0,3).join(', ')}
       </div>`
     ).join('');
     searchResults.style.display = 'block';
-  } catch(e) {
-    console.error(e);
-  }
+  } catch(e) { console.error(e); }
 }
 
-function doSearch() {
-  searchAddress(searchInput.value.trim());
-}
+function doSearch() { searchAddress(searchInput.value.trim()); }
 
 function goToResult(lat, lng, name) {
   searchResults.style.display = 'none';
   searchInput.value = name.split(',').slice(0,2).join(',');
   map.setView([lat, lng], 16);
-
   if (clickMarker) map.removeLayer(clickMarker);
-  clickMarker = L.circleMarker([lat, lng], {
-    radius: 8, color: '#174f96', fillColor: '#174f96', fillOpacity: 0.8, weight: 2
+  clickMarker = L.circleMarker([lat,lng],{
+    radius:8, color:'#174f96', fillColor:'#174f96', fillOpacity:.85, weight:2
   }).addTo(map);
-
   document.getElementById('map-loading').style.display = 'block';
-  queryZone(parseFloat(lat), parseFloat(lng)).finally(() => {
+  queryZone(parseFloat(lat), parseFloat(lng)).finally(()=>{
     document.getElementById('map-loading').style.display = 'none';
   });
 }
