@@ -308,6 +308,7 @@ function zoneBadgeClass(type) {
 
 // ── Init map ──────────────────────────────────────────────────────────────────
 const map = L.map('map', { center:[47.3769, 8.5417], zoom:13 });
+setTimeout(() => map.invalidateSize(), 200);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',
